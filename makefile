@@ -1,6 +1,6 @@
 FLAGS = -O2 -ffree-form -w 
 
-OBJS = arrays.o main.o initial.o reader.o evolve.o sources.o \
+OBJS = arrays.o main.o initial.o initialDirac0.o reader.o evolve.o sources.o \
 metric.o potential.o energy.o save0Ddata.o save1Ddata.o 
 
 

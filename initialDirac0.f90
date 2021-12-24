@@ -22,7 +22,7 @@
   real(8) zero,half,one,two,kappa0,third
   real(8) aux
   real(8) smallpi
-  real(8) ro, Srr
+  real(8) ro, Srr, ro_aux, Srr_aux
 
   real(8), allocatable, dimension (:) :: dF1,dF2,dG1,dG2
   allocate(dF1(0:Nr),dF2(0:Nr),dG1(0:Nr),dG2(0:Nr))
@@ -89,11 +89,16 @@
 
           aux = a(i-1) + &
             (a(i-1)*(half*(one - a(i-1)**2)/r(i-1) &
-            + r(i-1)*a(i-1)**2*ro))*dr
+            + r(i-1)*a(i-1)**2*ro))*dr*half
+
+          ro_aux = (1/(r(i-1)**2*aux**2))*( &
+          aux*(F1(i-1)**2 + F2(i-1)**2 - G1(i-1)**2 - G2(i-1)**2) &
+          + (2*aux/r(i-1))*(F1(i-1)*G2(i-1) - F2(i-1)*G1(i-1)) &
+          + F1(i-1)*dG2(i-1) - F2(i-1)*dG1(i-1) + G1(i-1)*dF2(i-1) - G2(i-1)*dF1(i-1))
 
           a(i) = a(i-1) + &
             (aux*(half*(one - aux**2)/r(i-1) &
-            + r(i-1)*aux**2*ro))*dr
+            + r(i-1)*aux**2*ro_aux))*dr
 
        end do
 
@@ -107,11 +112,14 @@
 
           aux = alpha(i+1) - &
             (alpha(i+1)*(half*(one - a(i+1)**2)/r(i+1) &
-            - r(i+1)*a(i+1)**2*Srr))*dr 
+            - r(i+1)*a(i+1)**2*Srr))*dr*half
+          
+          Srr_aux = (1/(r(i+1)**2*aux**2))*(F1(i+1)*dG2(i+1) &
+          - F2(i+1)*dG1(i+1) + G1(i+1)*dF2(i+1) - G2(i+1)*dF1(i+1))
 
           alpha(i) = alpha(i+1) - &
             (aux*(half*(one - a(i+1)**2)/r(i+1) &
-            - r(i+1)*a(i+1)**2*Srr))*dr 
+            - r(i+1)*a(i+1)**2*Srr_aux))*dr
                                 
        end do
 
