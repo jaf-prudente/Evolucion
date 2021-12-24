@@ -10,3 +10,4 @@ xQStar
 
 # También añadimos un .json por vscode
 *.json
+.vscode
