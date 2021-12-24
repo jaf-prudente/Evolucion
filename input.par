@@ -1,0 +1,15 @@
+0   ! Tipo de materia; 1 para Dirac, 0 para escalar
+0.01		! Grid spacing (dr)
+0.15 !0.25		! Courant parameter (dtfac=dt/dr)
+160		! Number of grid points (Nr)
+2000		! Number of time steps (Nt)
+10 !20		! How often do we do 0D output (Noutput0D)
+50 !1000		! How often do we do 1D output (Noutput1D)
+0.01		! Amplitud1 of initial gaussian real profile (amp1)
+0.01		! Amplitud2 of initial gaussian img  profile (amp2)
+8.0		! Width1 of initial gaussian real profile (sigma1)
+8.0		! Width2 of initial gaussian img  profile (sigma2)
+1		! Type of potential for phi (Vtype)
+1.0		! Parameter for potential (lambda).
+0.0		! Parameter for potential (gamma).
+0.0		! Parameter for potential (epsilon).

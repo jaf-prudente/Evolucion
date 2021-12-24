@@ -1,0 +1,12 @@
+# Ignoramos todos los ficheros con terminación .o
+*.o
+
+# También todos los ficheros de datos, que terminan en .rl y .tl
+*.tl
+*.rl
+
+# Así mismo ignoramos el ejecutable llamado 'xQStar'
+xQStar
+
+# También añadimos un .json por vscode
+*.json
