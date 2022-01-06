@@ -1,4 +1,4 @@
-1   ! Tipo de materia; 1 para Dirac, 0 para escalar
+1   ! Tipo de materia; 1 para Dirac, 0 para escalar.
 0.01		! Grid spacing (dr)
 0.15 !0.25		! Courant parameter (dtfac=dt/dr)
 160		! Number of grid points (Nr)
@@ -13,3 +13,5 @@
 1.0		! Parameter for potential (lambda).
 0.0		! Parameter for potential (gamma).
 0.0		! Parameter for potential (epsilon).
+
+! comentario de prueba
