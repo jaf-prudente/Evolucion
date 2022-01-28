@@ -64,6 +64,7 @@
 
   close(1)
 
+! TENEMOS QUE HACER LO CORRESPONDIENTE A ESTO PERO CON F.
 ! Lapse function alpha.
 
   if (filestatus=='replace') then

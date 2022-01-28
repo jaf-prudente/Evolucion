@@ -35,9 +35,10 @@
     ! AQUÍ VA 35 DE DAKA
     
       do i=0,Nr
-         sphi1(i) = alpha(i)*pi1(i)/a(i)
-         sphi2(i) = alpha(i)*pi2(i)/a(i)
-         sphi3(i) = alpha(i)*pi3(i)/a(i)
+         sF1(i) = alpha(i)*pi1(i)/a(i)
+         sF2(i) = alpha(i)*pi2(i)/a(i)
+         sG1(i) = alpha(i)*pi3(i)/a(i)
+         sG2(i) = alpha(i)
       end do
     
     

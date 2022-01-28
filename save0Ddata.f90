@@ -100,6 +100,7 @@
   write(1,"(4ES14.6)") t,min,max,alpha(0)
   close(1)
 
+! TENEMOS QUE HACER ESTO MISMO PARA F_1, F_2, G_1 Y G_2.
 ! Scalar field phi [the modulus of the wave function].
 
   max = phi(0)
