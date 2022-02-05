@@ -100,7 +100,6 @@
   write(1,"(4ES14.6)") t,min,max,alpha(0)
   close(1)
 
-! TENEMOS QUE HACER ESTO MISMO PARA F_1, F_2, G_1 Y G_2.
 ! Scalar field phi [the modulus of the wave function].
 
   max = phi(0)
@@ -740,6 +739,136 @@
   end if
   write(1,"(2ES14.6)") t,RicciScalar(1)
   close(1)
+
+!  Dirac
+
+
+! Real part of the F (F1).
+
+  max = F1(0)
+  min = F1(0)
+
+  do i=1,Nr
+     if (F1(i)>max) max = F1(i)
+     if (F1(i)<min) min = F1(i)
+  end do
+
+  if (filestatus == 'replace') then
+     open(1,file='F1_max.tl',form='formatted',status=filestatus)
+     write(1,*) '"F1_max.tl'
+  else
+     open(1,file='F1_max.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,max
+  close(1)
+
+  if (filestatus == 'replace') then
+     open(1,file='F1_0.tl',form='formatted',status=filestatus)
+     write(1,*) '"F1_0.tl'
+  else
+     open(1,file='F1_0.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,F1(0)
+  close(1)
+
+!!!!
+
+! Imaginary part of the F (F2).
+
+  max = F2(0)
+  min = F2(0)
+
+  do i=1,Nr
+     if (F2(i)>max) max = F2(i)
+     if (F2(i)<min) min = F2(i)
+  end do
+
+  if (filestatus == 'replace') then
+     open(1,file='F2_max.tl',form='formatted',status=filestatus)
+     write(1,*) '"F2_max.tl'
+  else
+     open(1,file='F2_max.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,max
+  close(1)
+
+  if (filestatus == 'replace') then
+     open(1,file='F2_0.tl',form='formatted',status=filestatus)
+     write(1,*) '"F2_0.tl'
+  else
+     open(1,file='F2_0.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,F2(0)
+  close(1)
+
+
+
+! Real part of the G (G1).
+
+  max = G1(0)
+  min = G1(0)
+
+  do i=1,Nr
+     if (G1(i)>max) max = G1(i)
+     if (G1(i)<min) min = G1(i)
+  end do
+
+  if (filestatus == 'replace') then
+     open(1,file='G1_max.tl',form='formatted',status=filestatus)
+     write(1,*) '"G1_max.tl'
+  else
+     open(1,file='G1_max.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,max
+  close(1)
+
+  if (filestatus == 'replace') then
+     open(1,file='G1_0.tl',form='formatted',status=filestatus)
+     write(1,*) '"G1_0.tl'
+  else
+     open(1,file='G1_0.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,G1(0)
+  close(1)
+
+!!!!
+
+! Imaginary part of the F (F2).
+
+  max = G2(0)
+  min = G2(0)
+
+  do i=1,Nr
+     if (G2(i)>max) max = G2(i)
+     if (G2(i)<min) min = G2(i)
+  end do
+
+  if (filestatus == 'replace') then
+     open(1,file='G2_max.tl',form='formatted',status=filestatus)
+     write(1,*) '"G2_max.tl'
+  else
+     open(1,file='G2_max.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,max
+  close(1)
+
+  if (filestatus == 'replace') then
+     open(1,file='G2_0.tl',form='formatted',status=filestatus)
+     write(1,*) '"G2_0.tl'
+  else
+     open(1,file='G2_0.tl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+  write(1,"(2ES14.6)") t,G2(0)
+  close(1)
+
 
 
 ! --->   END   <---

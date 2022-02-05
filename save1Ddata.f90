@@ -64,7 +64,6 @@
 
   close(1)
 
-! TENEMOS QUE HACER LO CORRESPONDIENTE A ESTO PERO CON F.
 ! Lapse function alpha.
 
   if (filestatus=='replace') then
@@ -701,6 +700,89 @@
 
   do i=0,Nr
      write(1,"(2ES14.6)") r(i),RicciScalar(i)
+  end do
+
+  write(1,*)
+
+  close(1)
+
+!!!!!!!!!!!!!!!!! Dirac stars
+
+! F1.
+
+  if (filestatus=='replace') then
+     open(1,file='F1.rl',form='formatted',status=filestatus)
+  else
+     open(1,file='F1.rl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+
+  write(1,"(A9,ES14.6)") ''
+  write(1,"(A9,ES14.6)") '#Time = ',t
+
+  do i=0,Nr
+     write(1,"(2ES14.6)") r(i),F1(i)
+  end do
+
+  write(1,*)
+
+  close(1)
+
+! F2.
+
+  if (filestatus=='replace') then
+     open(1,file='F2.rl',form='formatted',status=filestatus)
+  else
+     open(1,file='F2.rl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+
+  write(1,"(A9,ES14.6)") ''
+  write(1,"(A9,ES14.6)") '#Time = ',t
+
+  do i=0,Nr
+     write(1,"(2ES14.6)") r(i),F2(i)
+  end do
+
+  write(1,*)
+
+  close(1)
+
+! G1.
+
+  if (filestatus=='replace') then
+     open(1,file='G1.rl',form='formatted',status=filestatus)
+  else
+     open(1,file='G1.rl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+
+  write(1,"(A9,ES14.6)") ''
+  write(1,"(A9,ES14.6)") '#Time = ',t
+
+  do i=0,Nr
+     write(1,"(2ES14.6)") r(i),G1(i)
+  end do
+
+  write(1,*)
+
+  close(1)
+
+
+! G2.
+
+  if (filestatus=='replace') then
+     open(1,file='G2.rl',form='formatted',status=filestatus)
+  else
+     open(1,file='G2.rl',form='formatted',status=filestatus, &
+     position='append')
+  end if
+
+  write(1,"(A9,ES14.6)") ''
+  write(1,"(A9,ES14.6)") '#Time = ',t
+
+  do i=0,Nr
+     write(1,"(2ES14.6)") r(i),G2(i)
   end do
 
   write(1,*)

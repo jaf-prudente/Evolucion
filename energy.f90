@@ -35,7 +35,7 @@
 ! -> The current
 
      j0 = phi1*pi2 - phi2*pi1
-! FALTA CAMBIARLA POR LA EXPRESIÓN DE DE DAKA
+
      rho = half*( pi1**2 + pi2**2 + &
 	          psi1**2 + psi2**2 )/a**2 + 0.5*V
 !	          psi1**2 + psi2**2 )/a**2 + V

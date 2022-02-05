@@ -32,6 +32,7 @@
   real(kind=8), allocatable, dimension (:) :: F1,F2,G1,G2
   real(kind=8), allocatable, dimension (:) :: F1_p,F2_p,G1_p,G2_p
   real(kind=8), allocatable, dimension (:) :: sF1,sF2,sG1,sG2
+  real(kind=8), allocatable, dimension (:) :: NodP
 
 ! All these are 1D arrays.
 ! The variables introduced above are.

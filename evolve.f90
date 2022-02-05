@@ -70,7 +70,7 @@
   allocate(p(0:Nr),p3(0:Nr),p_t(0:Nr),p3_t(0:Nr))
   allocate(mass(0:Nr),omega(0:Nr),omega_t(0:Nr),ADMmass(0:Nr),NofP(0:Nr))
   allocate(mass3(0:Nr),omega3(0:Nr),anisotropy(0:Nr),j0(0:Nr))
-  allocate(rho_total(0:Nr),mass_total(0:Nr))
+  allocate(rho_total(0:Nr),mass_total(0:Nr),NodP(0:Nr))
 
   allocate(adot(0:Nr))
   allocate(trash(0:Nr))
@@ -121,20 +121,30 @@
   G2_p  = 0.0d0
   
 
-! Call matter type data
+! Call Initial data
   if(mattertype==0) then
    call initial(Nr,dr)
-   call energy(Nr,dr,dt)
 
   else if(mattertype==1) then
    call initialDirac0(Nr,dr)
-   call energyDirac(Nr,dr,dt)
 
   end if
 
 
-! Compute Energy
-!  call energy(Nr,dr,dt)
+! Compute Energy 
+
+  if(mattertype==0) then
+
+    call energy(Nr,dr,dt)
+
+  else if(mattertype==1) then
+
+    call energyDirac(Nr,dr,dt)
+    print*, "energy dirac"
+   
+  end if
+
+
 
        temp(0) = zero
        temp(1) = 0.25D0*dr*r(1)**2*rho(1)
@@ -189,6 +199,9 @@
      a_p = a
      alpha_p = alpha
 
+! ---> matter
+
+!    scalar 
      phi1_p = phi1
      psi1_p = psi1
      pi1_p  = pi1
@@ -197,8 +210,9 @@
      psi2_p = psi2
      pi2_p  = pi2
 
+!    Dirac
      F1_p = F1
-     F1_p = F2
+     F2_p = F2
      G1_p = G1
      G2_p = G2
 
@@ -206,45 +220,44 @@
 
      do k=1,num_steps
 
+         if (k == 1) then
+            dtw = half*dt
+         else if (k == 2) then
+            dtw = half*dt
+         else
+            dtw = dt
+         end if
+
+       if(mattertype==0) then
+
 !       Calculate RHSs.
 
-        
+        call sources(Nr,dr)
+ 
+        do i=0,Nr
+           phi1(i) = phi1_p(i) + dtw*sphi1(i)
+           phi2(i) = phi2_p(i) + dtw*sphi2(i)
+        end do
 
-           if (k == 1) then
-              dtw = half*dt
-           else if (k == 2) then
-              dtw = half*dt
-           else
-              dtw = dt
-           end if
+        do i=1,Nr-1
+           psi1(i) = psi1_p(i) + dtw*spsi1(i)
+           psi2(i) = psi2_p(i) + dtw*spsi2(i)
+        end do
 
-      if (mattertype==0) then
-            call sources(Nr,dr)
-
-            do i=0,Nr
-               phi1(i) = phi1_p(i) + dtw*sphi1(i)
-               phi2(i) = phi2_p(i) + dtw*sphi2(i)
-            end do
-
-            do i=1,Nr-1
-               psi1(i) = psi1_p(i) + dtw*spsi1(i)
-               psi2(i) = psi2_p(i) + dtw*spsi2(i)
-            end do
-
-            do i=1,Nr-1
-               pi1(i)  = pi1_p(i)  + dtw*spi1(i)
-               pi2(i)  = pi2_p(i)  + dtw*spi2(i)
-            end do
+        do i=1,Nr-1
+           pi1(i)  = pi1_p(i)  + dtw*spi1(i)
+           pi2(i)  = pi2_p(i)  + dtw*spi2(i)
+        end do
 
 !     Regularity boundary conditions at origin for (psi,pi):
 !     1) psi must be odd.
 !     2) pi must be even.
 
-            psi1(0) = - psi1(1)
-            pi1(0)  = + pi1(1)
+        psi1(0) = - psi1(1)
+        pi1(0)  = + pi1(1)
 
-            psi2(0) = - psi2(1)
-            pi2(0)  = + pi2(1)
+        psi2(0) = - psi2(1)
+        pi2(0)  = + pi2(1)
 
 !       Outer boundary condition for pi.  For pi I use an
 !       outgoing wave boundary condition:
@@ -260,15 +273,15 @@
 !       finite differencing of this last expression, and solve for
 !       the boundary value.
 
-           dtfac = dtw/dr
-           aux = dtw/(r(Nr) + r(Nr-1))
+        dtfac = dtw/dr
+        aux = dtw/(r(Nr) + r(Nr-1))
 
-           pi1(Nr) = (pi1(Nr-1)*(dtfac - one - aux) &
+        pi1(Nr) = (pi1(Nr-1)*(dtfac - one - aux) &
                   + pi1_p(Nr  )*(one - dtfac - aux) &
                   + pi1_p(Nr-1)*(one + dtfac - aux)) &
                    /(one + dtfac + aux)
 
-           pi2(Nr) = (pi2(Nr-1)*(dtfac - one - aux) &
+        pi2(Nr) = (pi2(Nr-1)*(dtfac - one - aux) &
                   + pi2_p(Nr  )*(one - dtfac - aux) &
                   + pi2_p(Nr-1)*(one + dtfac - aux)) &
                    /(one + dtfac + aux)
@@ -282,11 +295,11 @@
 !
 !       where we assumed that alpha=a=1 at the bounadry.
 
-!           psi1(Nr) = - pi1(Nr) - phi1(Nr)/r(Nr)
-           psi1(Nr) = - alpha(Nr)*pi1(Nr)/a(Nr) - phi1(Nr)/r(Nr)
+!       psi1(Nr) = - pi1(Nr) - phi1(Nr)/r(Nr)
+        psi1(Nr) = - alpha(Nr)*pi1(Nr)/a(Nr) - phi1(Nr)/r(Nr)
 
-!           psi2(Nr) = - pi2(Nr) - phi2(Nr)/r(Nr)
-           psi2(Nr) = - alpha(Nr)*pi2(Nr)/a(Nr) - phi2(Nr)/r(Nr)
+!       psi2(Nr) = - pi2(Nr) - phi2(Nr)/r(Nr)
+        psi2(Nr) = - alpha(Nr)*pi2(Nr)/a(Nr) - phi2(Nr)/r(Nr)
 
 
 !       Get new potential (must be done before integrating
@@ -297,40 +310,59 @@
 !       Integrate metric coefficients (a,alpha).
 
         call metric(Nr,dr)
-      
-      elseif (mattertype==1) then
-            call sourcesDirac(Nr,dr)
 
-            ! Método de ICF
-            do i=0,Nr
-               F1(i) = F1_p(i) + dtw*sF1(i)
-               F2(i) = F2_p(i) + dtw*sF2(i)
-               G1(i) = G1_p(i) + dtw*sG1(i)
-               G2(i) = G2_p(i) + dtw*sG2(i)
-            end do
+       else if(mattertype==1) then
 
-            ! Condiciones de regularidad
-            F1(0) = - F1(1)
-            F2(0) = -F2(1)
-            G1(0) = G1(1)
-            G2(0) = G2(1)
+        call sourcesDirac(Nr,dr)
+ 
+        do i=1,Nr-1
+           F1(i) = F1_p(i) + dtw*sF1(i)
+           F2(i) = F2_p(i) + dtw*sF2(i)
+           G1(i) = G1_p(i) + dtw*sG1(i)
+           G2(i) = G2_p(i) + dtw*sG2(i)
+        end do
 
-            call metricDirac(Nr,dr)
+!     Regularity boundary conditions at origin for (f's and g's):
+!     1) f1,f2 must be odd.
+!     2) g1,g2 must be even.
 
-         end if
+        F1(0) = - F1(1)
+        G1(0)  = + G1(1)
+
+        F2(0) = - F2(1)
+        G2(0)  = + G2(1)
+
+!       Outer boundary condition 
+
+        F1(Nr) = F1(Nr-1)
+        G1(Nr) = G1(Nr-1)
+
+        F2(Nr) = F2(Nr-1)
+        G2(Nr) = G2(Nr-1)
+
+!
+!       Integrate metric coefficients (a,alpha).
+
+        call metricDirac(Nr,dr)
+
+       end if
 
      end do
 
 
-!    Calculate energy and mass
-  if(mattertype==0) then
+!  Compute Energy 
+
+    if(mattertype==0) then
+
       call energy(Nr,dr,dt)
 
-  else if(mattertype==1) then
-      call energyDirac(Nr,dr,dt)
+    else if(mattertype==1) then
 
-  end if
-     
+      call energyDirac(Nr,dr,dt)
+    
+    end if
+
+
 
 !    Calculate the Krr component of the extrinsic curvature
 
@@ -348,20 +380,23 @@
 !    This quantity should be zero analytically, but not numerically.
 !    Numerically, it should converge to zero to second order.
 
-     if(mattertype==0) then
-         do i=0,Nr
-            adot(i) = (a(i) - a_p(i))/dt - 0.25D0*r(i) &
-               *(alpha(i)*pi1(i)*psi1(i) &
-               + alpha_p(i)*pi1_p(i)*psi1_p(i) &  
-               + alpha(i)*pi2(i)*psi2(i) &
-               + alpha_p(i)*pi2_p(i)*psi2_p(i)  )
-         end do
-   
-      else if(mattertype==1) then
-         ! AQUÍ SE SOLUCIONA (B1) DE DAKA CON (B2. ADOT ES UNA MEDIDA DE ERROR
-      
-      end if
-        
+   if(mattertype==0) then
+
+     do i=0,Nr
+        adot(i) = (a(i) - a_p(i))/dt - 0.25D0*r(i) &
+           *(alpha(i)*pi1(i)*psi1(i) &
+           + alpha_p(i)*pi1_p(i)*psi1_p(i) &  
+         + alpha(i)*pi2(i)*psi2(i) &
+           + alpha_p(i)*pi2_p(i)*psi2_p(i)  )
+     end do
+
+    else if(mattertype==1) then
+
+    
+    
+    end if
+
+
 
 
 

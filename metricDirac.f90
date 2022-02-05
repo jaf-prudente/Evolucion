@@ -1,5 +1,4 @@
-
-  subroutine metric(Nr,dr)
+subroutine metricDirac(Nr,dr)
 
 ! METRIC COMPONENTS  
 ! Integrate the equations for the metric
@@ -14,135 +13,122 @@
 
   real(8) dr,idr
   real(8) zero,half,one,two,kappa0
-  real(8) aux, rescale,ssa,rk1,rhoa, rhoa1, rhoa2, rrhoa
-  real(8) ssalpha, aux1, ssa2, aux2
+!  real(8) aux, rescale,ssa,rk1,rhoa, rhoa1, rhoa2, rrhoa
+!  real(8) ssalpha, aux1, ssa2, aux2
+
+    real(8) aux, ro, Srr, ro_aux, Srr_aux, ro_aux2, Srr_aux2
+    real(8) ro_a1, ro_a2, roa, ssa, rk1, aux1, aux2
+    real(8) ssalpha
+
+    real(8), allocatable, dimension (:) :: dF1,dF2,dG1,dG2
+    allocate(dF1(0:Nr),dF2(0:Nr),dG1(0:Nr),dG2(0:Nr))
 
 
 ! --->   NUMBERS
 
   idr = 1.0d0/dr
-  V3=0.0
+
 
 ! --->   METRIC {a}
 
-! RESOLVER (36) DE DAKA
-! aquí van las ecuaciones (36) de Daka
+
+! dF and dG using finite differencing.
+
+    do i=1,Nr-1
+      dF1(i) = half*(F1(i+1) - F1(i-1))*idr
+      dF2(i) = half*(F2(i+1) - F2(i-1))*idr
+      dG1(i) = half*(G1(i+1) - G1(i-1))*idr
+      dG2(i) = half*(G2(i+1) - G2(i-1))*idr
+    end do
+
+!  One sided derivative at outer boundary.
+
+    dF1(Nr) = half*(3.0d0*F1(Nr) - 4.0d0*F1(Nr-1) + F1(Nr-2))*idr
+    dF2(Nr) = half*(3.0d0*F2(Nr) - 4.0d0*F2(Nr-1) + F2(Nr-2))*idr
+    dG1(Nr) = half*(3.0d0*G1(Nr) - 4.0d0*G1(Nr-1) + G1(Nr-2))*idr
+    dG2(Nr) = half*(3.0d0*G2(Nr) - 4.0d0*G2(Nr-1) + G2(Nr-2))*idr
+
+    dF1(0) = half*(-3.0d0*F1(0) + 4.0d0*F1(1) - F1(2))*idr
+    dF2(0) = half*(-3.0d0*F2(0) + 4.0d0*F2(1) - F2(2))*idr
+    dG1(0) = half*(-3.0d0*G1(0) + 4.0d0*G1(1) - G1(2))*idr
+    dG2(0) = half*(-3.0d0*G2(0) + 4.0d0*G2(1) - G2(2))*idr
+
+!  Regularity at the origin.
+
+    F1(0) = -F1(1)
+    F2(0) = -F2(1)
+    G1(0) = G1(1)
+    G2(0) = G2(1)
+
+! Find the metric coefficients.
+
+    a(0) = one                           
+    a(1) = one
+
+    do i=2,Nr
+
+       ro = (1.0/(r(i-1)**2*a(i-1)**2))*( &
+            a(i-1)*(F1(i-1)**2 + F2(i-1)**2 - G1(i-1)**2 - G2(i-1)**2) &
+            + (2.0*a(i-1)/r(i-1))*(F1(i-1)*G2(i-1) - F2(i-1)*G1(i-1)) &
+            + F1(i-1)*dG2(i-1) - F2(i-1)*dG1(i-1) + G1(i-1)*dF2(i-1) - G2(i-1)*dF1(i-1))
+
+       ssa = a(i-1)*(half*(one - a(i-1)**2)/r(i-1) &
+                + r(i-1)*a(i-1)**2*ro)
+
+       rk1 = a(i-1) + dr*half*ssa
+
+       ro_a1 = (1.0/(r(i-1)**2*rk1**2))*( &
+          rk1*(F1(i-1)**2 + F2(i-1)**2 - G1(i-1)**2 - G2(i-1)**2) &
+          + (2.0*rk1/r(i-1))*(F1(i-1)*G2(i-1) - F2(i-1)*G1(i-1)) &
+          + F1(i-1)*dG2(i-1) - F2(i-1)*dG1(i-1) + G1(i-1)*dF2(i-1) - G2(i-1)*dF1(i-1))
+
+          ro_a2 = (1.0/(r(i)**2*rk1**2))*( &
+          rk1*(F1(i)**2 + F2(i)**2 - G1(i)**2 - G2(i)**2) &
+          + (2.0*rk1/r(i))*(F1(i)*G2(i) - F2(i)*G1(i)) &
+          + F1(i)*dG2(i) - F2(i)*dG1(i) + G1(i)*dF2(i) - G2(i)*dF1(i))
+
+          roa = half*(ro_a1*r(i-1) + ro_a2*r(i))   
+          
+          ssa = rk1* ( (one - rk1**2)/(r(i-1) + r(i)) + half*(r(i-1) + r(i))*rk1**2*(roa) )  
+
+          a(i) = a(i-1) + dr*ssa
+    end do
 
 
-  a(0) = one
-  a(1) = one
+!   Compute alpha from outside
 
-  do i=2,Nr
+    alpha(Nr) = one/a(Nr)
 
-    ! ESTE ES EL MÉTODO EN SÍ PARA RESOLVER (36)
-!    rhoa es rho de (37).
-     rhoa = half*( (pi1(i-1)**2  + pi2(i-1)**2 &
-                   + psi1(i-1)**2 + psi2(i-1)**2)/a(i-1)**2 &
-                   + V(i-1) )
-!   ssa es (36) en sí
-     ssa = a(i-1)*( half*(one - a(i-1)**2)/r(i-1) &
-            + half*kappa0*r(i-1)*a(i-1)**2*rhoa )
-!   este es el método de rk1 con un paso intermedio
-     rk1 = a(i-1) + half*dr*ssa
-
-!    Método de la rana
-     ! rhoa1 es rho evaluada en i-1
-     rhoa1 = half*( (pi1(i-1)**2  + pi2(i-1)**2 &
-                   + psi1(i-1)**2 + psi2(i-1)**2)/rk1**2 &
-                   + V(i-1) )
-
-    ! rhoa2 es rho evaluada en i
-     rhoa2 = half*( (pi1(i)**2  + pi2(i)**2 &
-                   + psi1(i)**2 + psi2(i)**2)/rk1**2 &
-                   + V(i) )
+    do i=Nr-1,1,-1
+          
+        Srr = (1.0/(r(i+1)**2*a(i+1)**2))*(F1(i+1)*dG2(i+1) &
+               - F2(i+1)*dG1(i+1) + G1(i+1)*dF2(i+1) - G2(i+1)*dF1(i+1))
+               
+        aux1 = -half*(one - a(i+1)**2)/r(i+1) &
+                + r(i+1)*a(i+1)**2*Srr
+           
+        ssalpha = alpha(i+1)*aux1       
  
-    ! rrhoa es el promedio
-     rrhoa = 0.5* (r(i-1)*rhoa1 + r(i)*rhoa2)
+        aux = alpha(i+1) - half*dr*ssalpha
 
-    ! ssa es (36)con el promedio de rho y con rk1 en lugar de a
-     ssa =rk1* ( (one - rk1**2)/(r(i-1) + r(i)) + kappa0*half*rk1**2*( rrhoa ))
-     
-    ! El método de Euler
-     a(i) = a(i-1) + dr*(ssa)
+        Srr_aux2 = (1.0/(r(i)**2*aux**2))*(F1(i)*dG2(i) &
+                    - F2(i)*dG1(i) + G1(i)*dF2(i) - G2(i)*dF1(i))
 
-  end do
+        aux2 = -half*(one - a(i)**2)/r(i) &
+                + r(i)*a(i)**2*Srr_aux2
 
+        ssalpha = half* (aux1+aux2)
 
-! --->   LAPSE {alpha}
+        alpha(i) = alpha(i+1) - aux*(ssalpha)*dr
+                                
+    end do
 
-! This must be done after finding the metric
-! coefficient "a", as it depends on it.
+    alpha(0) = alpha(1)
 
-! The equation for the lapse (the "slicing condition")
-! comes from the condition that the angular metric must
-! always be r**2 ("polar-areal" slicing):
-!
-!                      2                             2
-! d alpha = alpha ( ( a - 1 ) / r  +  d ln(a)  -  r a  V )
-!  r                                   r
-!
-! We solve this equation integrating from the outside
-! in order to impose the correct asymptotic
-! boundary conditions.
-!
-! The outer boundary condition we use is simply:
-!
-! alpha = 1/a
-!
-! This is true in Schwarzschild, and also has to be
-! true in vacuum. 
-   alpha(Nr) = -a(Nr)*(phi1(Nr)/r(Nr) + psi1(Nr))/pi1(Nr)
-
-! Integrate from the outside using second order Runge-Kutta.
-
-!
-!                      2                             2
-! d alpha = alpha ( ( a - 1 ) / r  +  d ln(a)  -  r a  V )
-!  r                                   r
-
-
-  do i=Nr-1,1,-1
-
-!    Move half a grid spacing.
-     rhoa = half*( (pi1(i+1)**2  + pi2(i+1)**2 &
-                   + psi1(i+1)**2 + psi2(i+1)**2)/a(i+1)**2 &
-                   + V(i+1) )
-
-     ssa =  half*(one - a(i+1)**2)/r(i+1) &
-            + half*kappa0*r(i+1)*a(i+1)**2*rhoa 
-
-     aux1 = ( a(i+1)**2 - 1.0d0 )/r(i+1) +  ssa  & 
-            - kappa0*half*r(i+1)*a(i+1)**2*V(i+1) 
-
-     ssalpha = alpha(i+1)*aux1 
-
-     aux = alpha(i+1) - half*dr*ssalpha
-
-!    Now evaluate the source at the mid point and
-!    leapfrog over it.
-
-     rhoa = half*( (pi1(i)**2  + pi2(i)**2 &
-                   + psi1(i)**2 + psi2(i)**2)/a(i)**2 &
-                   + V(i) )
-
-     ssa2 =  half*(one - a(i)**2)/r(i) &
-            + half*kappa0*r(i)*a(i)**2*rhoa 
-
-     aux2 = ( a(i)**2 - 1.0d0 )/r(i) +  ssa2  & 
-            - kappa0*half*r(i)*a(i)**2*V(i) 
-
-     ssalpha = half* (aux1+aux2)
-  
-     alpha(i) = alpha(i+1) - dr*aux*(ssalpha)
-
-
-  end do
-
-! And at the origin.
-
-  alpha(0) = alpha(1)
+! -------------------------
+! -------------------------
 
 
 ! --->   END   <---
 
-  end subroutine metric
+  end subroutine 
