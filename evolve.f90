@@ -29,7 +29,7 @@
   real(8) aux,r95
   real(8), allocatable, dimension (:) :: temp,m95
   real(8) quarter
-
+  real(8) Sr
 ! Numbers
 
   zero  = 0.0D0
@@ -383,11 +383,11 @@
    if(mattertype==0) then
 
      do i=0,Nr
-        adot(i) = (a(i) - a_p(i))/dt - 0.25D0*r(i) &
-           *(alpha(i)*pi1(i)*psi1(i) &
-           + alpha_p(i)*pi1_p(i)*psi1_p(i) &  
-         + alpha(i)*pi2(i)*psi2(i) &
-           + alpha_p(i)*pi2_p(i)*psi2_p(i)  )
+      ! prof ayudenos con esto lo tkm mucho
+        Sr=two/(r(i)*a_p(i))*(F1(i)*dF2(i))
+
+        adot(i) =a_p(i)-(r(i)*a_p(i)*alpha_p(i)*Sr)*dt
+ 
      end do
 
     else if(mattertype==1) then
