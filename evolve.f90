@@ -23,13 +23,16 @@
   integer IData
   integer num_steps
 
-  real(8) dr,dt,t
+  real(8) dr,dt,t, idr
   real(8) dtfac,dtw
   real(8) zero,third,half,one,two,kappa0
   real(8) aux,r95
   real(8), allocatable, dimension (:) :: temp,m95
   real(8) quarter
-  real(8) Sr
+  real(8) Sr,Sr_p
+  real(8), allocatable, dimension (:) :: dF1, dF2, dG1, dG2
+  real(8), allocatable, dimension (:) :: dF1_p, dF2_p, dG1_p, dG2_p
+
 ! Numbers
 
   zero  = 0.0D0
@@ -39,7 +42,7 @@
   two   = 2.0D0
   kappa0 = 2.0D0
   quarter = 0.25D0
-
+  idr=1.0D0/dr
 
 ! Allocate arrays 
 
@@ -65,6 +68,9 @@
   allocate(F1_p(0:Nr),F2_p(0:Nr),G1_p(0:Nr),G2_p(0:Nr))
   allocate(sF1(0:Nr),sF2(0:Nr),sG1(0:Nr),sG2(0:Nr))
 
+  allocate(dF1_p(0:Nr),dF2_p(0:Nr),dG1_p(0:Nr),dG2_p(0:Nr))
+  allocate(dF1(0:Nr),dF2(0:Nr),dG1(0:Nr),dG2(0:Nr))
+  
   allocate(phi(0:Nr))
   allocate(rho(0:Nr),rho3(0:Nr))
   allocate(p(0:Nr),p3(0:Nr),p_t(0:Nr),p3_t(0:Nr))
@@ -380,19 +386,68 @@
 !    This quantity should be zero analytically, but not numerically.
 !    Numerically, it should converge to zero to second order.
 
-   if(mattertype==0) then
+
+     if(mattertype==0) then
+
+      do i=0,Nr
+         adot(i) = (a(i) - a_p(i))/dt - 0.25D0*r(i) &
+            *(alpha(i)*pi1(i)*psi1(i) &
+            + alpha_p(i)*pi1_p(i)*psi1_p(i) &  
+          + alpha(i)*pi2(i)*psi2(i) &
+            + alpha_p(i)*pi2_p(i)*psi2_p(i)  )
+      end do
+ 
+     else if(mattertype==1) then
+
+      !Derivada numérica
+
+      do i=1,Nr-1
+        dF1(i) = half*(F1(i+1) - F1(i-1))*idr
+        dF2(i) = half*(F2(i+1) - F2(i-1))*idr
+        dG1(i) = half*(G1(i+1) - G1(i-1))*idr
+        dG2(i) = half*(G2(i+1) - G2(i-1))*idr
+      end do
+
+!  One sided derivative at outer boundary.
+
+    dF1(Nr) = half*(3.0d0*F1(Nr) - 4.0d0*F1(Nr-1) + F1(Nr-2))*idr
+    dF2(Nr) = half*(3.0d0*F2(Nr) - 4.0d0*F2(Nr-1) + F2(Nr-2))*idr
+    dG1(Nr) = half*(3.0d0*G1(Nr) - 4.0d0*G1(Nr-1) + G1(Nr-2))*idr
+    dG2(Nr) = half*(3.0d0*G2(Nr) - 4.0d0*G2(Nr-1) + G2(Nr-2))*idr
+
+    dF1(0) = half*(-3.0d0*F1(0) + 4.0d0*F1(1) - F1(2))*idr
+    dF2(0) = half*(-3.0d0*F2(0) + 4.0d0*F2(1) - F2(2))*idr
+    dG1(0) = half*(-3.0d0*G1(0) + 4.0d0*G1(1) - G1(2))*idr
+    dG2(0) = half*(-3.0d0*G2(0) + 4.0d0*G2(1) - G2(2))*idr
+
+    do i=1,Nr-1
+      dF1_p(i) = half*(F1_p(i+1) - F1_p(i-1))*idr
+      dF2_p(i) = half*(F2_p(i+1) - F2_p(i-1))*idr
+      dG1_p(i) = half*(G1_p(i+1) - G1_p(i-1))*idr
+      dG2_p(i) = half*(G2_p(i+1) - G2_p(i-1))*idr
+    end do
+
+!  One sided derivative at outer boundary.
+
+  dF1_p(Nr) = half*(3.0d0*F1_p(Nr) - 4.0d0*F1_p(Nr-1) + F1_p(Nr-2))*idr
+  dF2_p(Nr) = half*(3.0d0*F2_p(Nr) - 4.0d0*F2_p(Nr-1) + F2_p(Nr-2))*idr
+  dG1_p(Nr) = half*(3.0d0*G1_p(Nr) - 4.0d0*G1_p(Nr-1) + G1_p(Nr-2))*idr
+  dG2_p(Nr) = half*(3.0d0*G2_p(Nr) - 4.0d0*G2_p(Nr-1) + G2_p(Nr-2))*idr
+
+  dF1_p(0) = half*(-3.0d0*F1_p(0) + 4.0d0*F1_p(1) - F1_p(2))*idr
+  dF2_p(0) = half*(-3.0d0*F2_p(0) + 4.0d0*F2_p(1) - F2_p(2))*idr
+  dG1_p(0) = half*(-3.0d0*G1_p(0) + 4.0d0*G1_p(1) - G1_p(2))*idr
+  dG2_p(0) = half*(-3.0d0*G2_p(0) + 4.0d0*G2_p(1) - G2_p(2))*idr
+
 
      do i=0,Nr
       ! prof ayudenos con esto lo tkm mucho
-        Sr=two/(r(i)*a_p(i))*(F1(i)*dF2(i))
-
-        adot(i) =a_p(i)-(r(i)*a_p(i)*alpha_p(i)*Sr)*dt
- 
-     end do
-
-    else if(mattertype==1) then
-
-    
+        Sr=two/(r(i)**2*a(i))*(F1(i)*dF2(i)-dF1(i)*F2(i)+G1(i)*dG2(i)-dG1(i)*G2(i))
+        Sr_p=two/(r(i)**2*a_p(i))*(F1_p(i)*dF2_p(i)-dF1_p(i)*F2_p(i)+G1_p(i)*dG2_p(i)-dG1_p(i)*G2_p(i))
+        
+        adot(i) =(a(i)-a_p(i))/dt-r(i)*(alpha(i)*a(i)*Sr+alpha_p(i)*a_p(i)*Sr_p)
+            
+     end do   
     
     end if
 
