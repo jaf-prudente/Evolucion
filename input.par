@@ -14,7 +14,7 @@
 1.0		! Parameter for potential (lambda).
 0.0		! Parameter for potential (gamma).
 0.0		! Parameter for potential (epsilon).
-0.009   ! Parámetro inicial de F en initialDirac1 (F1).
+0.009   ! Parámetro inicial de F en initialDirac1 (F0).
 1.008359 ! Frecuencia inicial en initialDirac1 (w).
 
 ! Para valores de 0.09 < F1 < 0.2 se recomienda Nr_rk4 = 12000

@@ -17,7 +17,7 @@
   real(8) r3,amp3,sigma3,kr
   real(8) lambda,gamma,epsilon
   real(8) lambda3,epsilon3
-  real(8) F1, w
+  real(8) F0, w
 
   mattertype=0
 
@@ -166,10 +166,10 @@
  
   end if
 
-! Parámetro inicial para F en initialDirac1 (F1).
+! Parámetro inicial para F en initialDirac1 (F0).
 
-  print *, 'Escribe el valor de F1'
-  read(*,*) F1
+  print *, 'Escribe el valor de F0'
+  read(*,*) F0
   print *
 
 ! Frecuencia inicial en initialDirac1 (w).
@@ -182,7 +182,7 @@
 
 ! --->   EVOLUTION   <---
 
-  call evolve(Nr,Nt,Noutput0D,Noutput1D,dr,dt,mattertype,F1,w,Nr_rk4)
+  call evolve(Nr,Nt,Noutput0D,Noutput1D,dr,dt,mattertype,F0,w,Nr_rk4)
 
 
 ! --->   END   <---

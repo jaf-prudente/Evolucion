@@ -1,4 +1,4 @@
-subroutine initialDirac1(Nr,dr,F1,w,Nr_rk4)
+subroutine initialDirac1(Nr,dr,F0,w,Nr_rk4)
 
 !                                              _______________________
 !    _______________________-------------------                       `\
@@ -33,7 +33,7 @@ subroutine initialDirac1(Nr,dr,F1,w,Nr_rk4)
     real(8) sexto, tercio, cuarto, medio, cero, uno, dos, ocho, diezseis
     real(8) dr
 
-    real(8) F1, w
+    real(8) F0, w
 
     ! Declaramos variables del método
     real(8) k1m, k1s, k1F, k1G
@@ -41,11 +41,8 @@ subroutine initialDirac1(Nr,dr,F1,w,Nr_rk4)
     real(8) k3m, k3s, k3F, k3G
     real(8) k4m, k4s, k4F, k4G
 
-    real(8) ak1, ak2
-
     ! Declaramos variables que guarden a las funciones derivadas
     real(8) dm, ds, dF, dG
-    real(8) da, dalpha
 
     ! Declaramos los arreglos que usaremos
     real(8), allocatable, dimension (:) :: m, s, F, G
@@ -64,15 +61,15 @@ subroutine initialDirac1(Nr,dr,F1,w,Nr_rk4)
 
     !---------------------------------------------------------------
     ! Definimos las condiciones iniciales (con simetrías)
-    m(0) = (dos*tercio)*(F1**2)*(dr**3)*w
-    s(0) = uno + tercio*(F1**2)*(dos*dos*w - uno)*dr**2
-    F(0) = F1*dr
-    G(0) = tercio*F1*(w - uno)*(dr**2)
+    m(0) = -(dos*tercio)*(F0**2)*(dr**3)*w
+    s(0) = uno + tercio*(F0**2)*(dos*dos*w - uno)*dr**2
+    F(0) = -F0*dr
+    G(0) = tercio*F0*(w - uno)*(dr**2)
 
-    m(0) = (dos*tercio)*(F1**2)*(dr**3)*w
-    s(0) = uno + tercio*(F1**2)*(dos*dos*w - uno)*dr**2
-    F(0) = F1*dr
-    G(0) = tercio*F1*(w - uno)*(dr**2)
+    m(1) = -m(0)
+    s(1) = s(0)
+    F(1) = -F(0)
+    G(1) = G(0)
 
     !---------------------------------------------------------------
     ! Hacemos el método de Runge-Kutta en sí
@@ -114,22 +111,26 @@ subroutine initialDirac1(Nr,dr,F1,w,Nr_rk4)
     do i=0, Nr_rk4
         F1(i) = F(i)
         F2(i) = 0
+        G1(i) = 0
+        G2(i) = G(i)
     end do
 
-    ! HACE FALTA UN ALGORITMO DE EXTRAPOLACIÓN
     do i=Nr_rk4+1, Nr 
-        F1(i) = uno
+        m(i) = m(Nr_rk4)
+        s(i) = s(Nr_rk4)
+        F1(i) = F(Nr_rk4)
         F2(i) = 0
+        G1(i) = G(Nr_rk4)
+        G2(i) = 0
     end do
-
 
     !---------------------------------------------------------------
     ! Encontremos los coeficientes métricos, primero a.
 
-    ! AQUÍ VA LA DEFINICIÓN DE A EN TÉRMINOS DE LO SOLUCIONADO.
-
-    !---------------------------------------------------------------
-    ! Después alpha.
+    do i=0, Nr
+        a(i) = uno/sqrt(uno - (2*m(i)/r(i)) )
+        alpha(i) = s(i)*sqrt(uno - (2*m(i)/r(i)) )
+    end do
 
 end subroutine
 
