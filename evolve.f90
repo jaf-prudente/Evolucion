@@ -1,5 +1,5 @@
 
-  subroutine evolve(Nr,Nt,Noutput0D,Noutput1D,dr,dt,mattertype)
+  subroutine evolve(Nr,Nt,Noutput0D,Noutput1D,dr,dt,mattertype,F1,w,Nr_rk4)
 
 ! *************************
 ! *** Evolving in time  ***
@@ -32,6 +32,8 @@
   real(8) Sr,Sr_p
   real(8), allocatable, dimension (:) :: dF1, dF2, dG1, dG2
   real(8), allocatable, dimension (:) :: dF1_p, dF2_p, dG1_p, dG2_p
+
+  real(8) F1, w
 
 ! Numbers
 

@@ -8,7 +8,7 @@
   common / gauss3  / r3,amp3,sigma3,kr
   common / Vparam3 / lambda3,epsilon3,Vtype3
 
-  integer Nr,Nt,Noutput0D,Noutput1D
+  integer Nr,Nr_rk4,Nt,Noutput0D,Noutput1D
   integer Vtype,Vtype3
   integer mattertype
 
@@ -17,6 +17,7 @@
   real(8) r3,amp3,sigma3,kr
   real(8) lambda,gamma,epsilon
   real(8) lambda3,epsilon3
+  real(8) F1, w
 
   mattertype=0
 
@@ -91,6 +92,12 @@
   read(*,*) Nr
   print *
 
+! Número de puntos de la malla para el rk4.
+
+  print *, 'Number of grid points (Nr_rk4)'
+  read(*,*) Nr_rk4
+  print *
+
 ! Number of time steps (Nt).
 
   print *, 'Number of time steps (Nt)'
@@ -151,7 +158,7 @@
      print *
   else if (Vtype.eq.2) then
      print *, 'Coefficient of quadratic term'
-     read(*,*) lambda
+     read(*,*) gamma
      print *
      print *, 'Coefficient of quartic term'
      read(*,*) epsilon
@@ -159,11 +166,23 @@
  
   end if
 
+! Parámetro inicial para F en initialDirac1 (F1).
+
+  print *, 'Escribe el valor de F1'
+  read(*,*) F1
+  print *
+
+! Frecuencia inicial en initialDirac1 (w).
+
+  print *, 'Escribe el valor de w'
+  read(*,*) w
+  print *
+
 ! ----------------------------------
 
 ! --->   EVOLUTION   <---
 
-  call evolve(Nr,Nt,Noutput0D,Noutput1D,dr,dt,mattertype)
+  call evolve(Nr,Nt,Noutput0D,Noutput1D,dr,dt,mattertype,F1,w,Nr_rk4)
 
 
 ! --->   END   <---

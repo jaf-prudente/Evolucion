@@ -2,6 +2,7 @@
 0.01		! Grid spacing (dr)
 0.15 !0.25		! Courant parameter (dtfac=dt/dr)
 16000		! Number of grid points (Nr)
+9000		! Número de puntos de la malla para el rk4 (Nr_rk4)
 200000		! Number of time steps (Nt)
 1000 !20		! How often do we do 0D output (Noutput0D)
 5000 !1000		! How often do we do 1D output (Noutput1D)
@@ -13,8 +14,7 @@
 1.0		! Parameter for potential (lambda).
 0.0		! Parameter for potential (gamma).
 0.0		! Parameter for potential (epsilon).
+0.009   ! Parámetro inicial de F en initialDirac1 (F1).
+1.008359 ! Frecuencia inicial en initialDirac1 (w).
 
-! Voy a jugarme un albur, con una baraja di oro que sí lo gano ya estuvo y si lo pierdo ni mmodo
-! porque yo soy d elos hombres, que cuando pierdo no lloroooooooooooooooooooooooooooooooooooo
-! Eres mas batallosa que hacer gárgaras boca abajo
-! le gusta kinky amsty y aunque sea fancy se pone kranky si lo hago romantic
+! Para valores de 0.09 < F1 < 0.2 se recomienda Nr_rk4 = 12000
